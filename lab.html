@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab Results – Bilovna Roti Mix</title>
+<meta name="description" content="Lab test results for every batch of Bilovna Roti Mix.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kalam:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#14213D;--teal:#1FA59F;--cream:#FBF5EA;--grey:#5B6475;--line:#E6DFD2}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--cream);color:var(--navy);line-height:1.5}
+  .bar{height:10px;background:var(--teal)}
+  .wrap{max-width:720px;margin:0 auto;padding:28px 18px 48px}
+  header img{width:170px;height:auto;display:block}
+  h1{font-family:Kalam,cursive;font-weight:400;font-size:46px;line-height:1.05;margin:28px 0 4px}
+  .lead{font-size:18px;font-weight:600;margin:0 0 4px}
+  .sub{color:var(--grey);margin:0 0 28px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}
+  label{font-weight:700;font-size:14px;display:block;margin-bottom:8px}
+  .row{display:flex;gap:8px}
+  input{flex:1;min-width:0;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--navy);border-radius:10px;text-transform:uppercase;background:#fff;color:var(--navy)}
+  button{font:inherit;font-weight:700;padding:12px 18px;border:0;border-radius:10px;background:var(--navy);color:#fff;cursor:pointer}
+  .hint{font-size:13px;color:var(--grey);margin:8px 0 0}
+  #result{margin-top:16px;display:none;border-radius:10px;padding:14px 16px}
+  #result.wait{display:block;background:#FFF6E3;border:1px solid #F0D9A6}
+  #result.ok{display:block;background:#E6F5F3;border:1px solid #B7E1DC}
+  #result a{color:var(--navy);font-weight:700}
+  h2{font-size:20px;margin:36px 0 12px}
+  .tests{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tests li{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .tests b{display:block}
+  .tests span{font-size:13px;color:var(--grey)}
+  .num{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--teal);color:#fff !important;font-size:12px;font-weight:800;line-height:1;margin-bottom:6px}
+  .batches{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  .batches th,.batches td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);font-size:14px}
+  .batches th{background:#F4EEE2}
+  .pill{font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px}
+  .pill.pass{background:#E6F5F3;color:#137A75}
+  .pill.pend{background:#FFF1D6;color:#8A5A00}
+  footer{margin-top:40px;font-size:13px;color:var(--grey)}
+  @media (max-width:520px){.tests{grid-template-columns:1fr}h1{font-size:38px}}
+</style>
+</head>
+<body>
+<div class="bar"></div>
+<div class="wrap">
+  <header><img src="/logo.png" alt="Bilovna – Where goodness rises"></header>
+
+  <h1>Lab results</h1>
+  <p class="lead">Every batch of Roti Mix is tested by an independent lab.</p>
+  <p class="sub">Enter the LOT number printed on your pouch to see the results for your batch.</p>
+
+  <div class="card">
+    <label for="lot">LOT number</label>
+    <div class="row">
+      <input id="lot" placeholder="e.g. RM2511A" autocomplete="off">
+      <button id="go">Check</button>
+    </div>
+    <p class="hint">You'll find it in the LOT / BEST BEFORE box on the back of the pouch.</p>
+    <div id="result" role="status"></div>
+  </div>
+
+  <h2>The 7 tests we run on every batch</h2>
+  <ul class="tests">
+    <li><span class="num">1</span><b>Protein</b><span>Confirms the protein content on the label.</span></li>
+    <li><span class="num">2</span><b>Heavy metals</b><span>Lead, cadmium, arsenic, mercury.</span></li>
+    <li><span class="num">3</span><b>Microbial</b><span>E. coli, Salmonella, yeast and mould.</span></li>
+    <li><span class="num">4</span><b>Hygiene check</b><span>Total bacteria count: shows the powder was handled cleanly.</span></li>
+    <li><span class="num">5</span><b>Aflatoxins</b><span>Toxins from mould on crops.</span></li>
+    <li><span class="num">6</span><b>Pesticides</b><span>Multi-residue pesticide screen.</span></li>
+    <li><span class="num">7</span><b>Glyphosate</b><span>The most widely used weed killer.</span></li>
+  </ul>
+  <p class="sub" style="margin-top:14px"><b style="color:var(--teal)">+ Amino acid profile:</b> all 9 essential amino acids, verified by an independent lab.</p>
+
+  <h2>All batches</h2>
+  <table class="batches"><thead><tr><th>LOT</th><th>Status</th><th>Report</th></tr></thead><tbody id="list"></tbody></table>
+
+  <footer>Bilovna Foods Limited · Cambridge, Ontario<br>Questions? Message us on Instagram @bilovnafoods</footer>
+</div>
+
+<script>
+/* ===== Add each batch here =====
+   status: "pending" or "passed"
+   report: file name in /reports/ (PDF), or "" if not ready */
+const BATCHES = [
+  { lot: "PILOT-01", status: "pending", report: "" },
+];
+
+const norm = s => s.trim().toUpperCase().replace(/\s+/g, "");
+const list = document.getElementById("list");
+BATCHES.forEach(b => {
+  const tr = document.createElement("tr");
+  const pill = b.status === "passed" ? '<span class="pill pass">All 7 passed</span>' : '<span class="pill pend">Testing in progress</span>';
+  const rep = b.report ? `<a href="/reports/${b.report}" target="_blank" rel="noopener">View PDF</a>` : "—";
+  tr.innerHTML = `<td>${b.lot}</td><td>${pill}</td><td>${rep}</td>`;
+  list.appendChild(tr);
+});
+
+function check() {
+  const v = norm(document.getElementById("lot").value);
+  const out = document.getElementById("result");
+  if (!v) return;
+  const b = BATCHES.find(x => norm(x.lot) === v);
+  if (b && b.status === "passed") {
+    out.className = "ok";
+    out.innerHTML = `<b>LOT ${b.lot}: all 7 tests passed.</b><br>` + (b.report ? `<a href="/reports/${b.report}" target="_blank" rel="noopener">Open the lab report (PDF)</a>` : "Report coming soon.");
+  } else {
+    out.className = "wait";
+    out.innerHTML = `<b>LOT ${v}: results are on the way.</b><br>This batch is being tested. Results are posted here as soon as the lab reports come back.`;
+  }
+}
+document.getElementById("go").addEventListener("click", check);
+document.getElementById("lot").addEventListener("keydown", e => { if (e.key === "Enter") check(); });
+const q = new URLSearchParams(location.search).get("lot");
+if (q) { document.getElementById("lot").value = q; check(); }
+</script>
+</body>
+</html>
