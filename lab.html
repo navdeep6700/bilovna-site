@@ -25,6 +25,7 @@
   .hint{font-size:13px;color:var(--grey);margin:8px 0 0}
   #result{margin-top:16px;display:none;border-radius:10px;padding:14px 16px}
   #result.wait{display:block;background:#FFF6E3;border:1px solid #F0D9A6}
+  #result.bad{display:block;background:#FDECEA;border:1px solid #F3C2BC}
   #result.ok{display:block;background:#E6F5F3;border:1px solid #B7E1DC}
   #result a{color:var(--navy);font-weight:700}
   h2{font-size:20px;margin:36px 0 12px}
@@ -88,6 +89,7 @@ const BATCHES = [
   { lot: "PILOT-01", status: "pending", report: "" },
 ];
 
+const REP = "/reports/";
 const norm = s => s.trim().toUpperCase().replace(/\s+/g, "");
 const list = document.getElementById("list");
 BATCHES.forEach(b => {
@@ -103,12 +105,15 @@ function check() {
   const out = document.getElementById("result");
   if (!v) return;
   const b = BATCHES.find(x => norm(x.lot) === v);
-  if (b && b.status === "passed") {
+  if (!b) {
+    out.className = "bad";
+    out.innerHTML = `<b>We couldn't find LOT ${v}.</b><br>Please check the LOT number on the back of your pouch and try again. If it still doesn't show up, message us on Instagram @bilovnafoods.`;
+  } else if (b.status === "passed") {
     out.className = "ok";
-    out.innerHTML = `<b>LOT ${b.lot}: all 7 tests passed.</b><br>` + (b.report ? `<a href="/reports/${b.report}" target="_blank" rel="noopener">Open the lab report (PDF)</a>` : "Report coming soon.");
+    out.innerHTML = `<b>LOT ${b.lot}: all 7 tests passed.</b><br>` + (b.report ? `<a href="${REP}${b.report}" target="_blank" rel="noopener">Open the lab report (PDF)</a>` : "Report coming soon.");
   } else {
     out.className = "wait";
-    out.innerHTML = `<b>LOT ${v}: results are on the way.</b><br>This batch is being tested. Results are posted here as soon as the lab reports come back.`;
+    out.innerHTML = `<b>LOT ${b.lot}: testing in progress.</b><br>Results are posted here as soon as the lab reports come back.`;
   }
 }
 document.getElementById("go").addEventListener("click", check);
