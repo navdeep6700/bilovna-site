@@ -13,7 +13,10 @@
   body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--cream);color:var(--navy);line-height:1.5}
   .bar{height:10px;background:var(--teal)}
   .wrap{max-width:720px;margin:0 auto;padding:28px 18px 48px}
-  header img{width:170px;height:auto;display:block}
+  .brand{display:inline-flex;flex-direction:column;align-items:center;text-decoration:none}
+  .brand img{width:240px;max-width:62vw;height:auto;display:block}
+  .tag{margin-top:8px;font-size:12px;font-weight:700;letter-spacing:.32em;color:var(--teal)}
+  @media (max-width:520px){.tag{font-size:10.5px;letter-spacing:.26em}}
   h1{font-family:Kalam,cursive;font-weight:400;font-size:46px;line-height:1.05;margin:28px 0 4px}
   .lead{font-size:18px;font-weight:600;margin:0 0 4px}
   .sub{color:var(--grey);margin:0 0 28px}
@@ -47,7 +50,7 @@
 <body>
 <div class="bar"></div>
 <div class="wrap">
-  <header><img src="/logo.png" alt="Bilovna – Where goodness rises"></header>
+  <header><a href="/" class="brand"><img src="/logo.svg" alt="Bilovna"><span class="tag">WHERE GOODNESS RISES</span></a></header>
 
   <h1>Lab results</h1>
   <p class="lead">Every batch of Roti Mix is tested by an independent lab.</p>
