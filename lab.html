@@ -35,7 +35,6 @@
   .tests{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .tests li{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
   .tests b{display:block}
-  .tests span{font-size:13px;color:var(--grey)}
   .num{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--teal);color:#fff !important;font-size:12px;font-weight:800;line-height:1;margin-bottom:6px}
   .batches{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
   .batches th,.batches td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);font-size:14px}
@@ -43,6 +42,14 @@
   .pill{font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px}
   .pill.pass{background:#E6F5F3;color:#137A75}
   .pill.pend{background:#FFF1D6;color:#8A5A00}
+  .tests li{display:flex;flex-direction:column}
+  .tests .top{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+  .tests .top .num{margin:0}
+  .tests .d{font-size:13px;color:var(--grey)}
+  .tests .foot{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .tests.one{grid-template-columns:1fr}
+  a.pdf{font-size:13px;font-weight:700;color:#fff !important;background:var(--navy);padding:6px 12px;border-radius:8px;text-decoration:none}
+  .soon{font-size:12px;color:var(--grey)}
   footer{margin-top:40px;font-size:13px;color:var(--grey)}
   @media (max-width:520px){.tests{grid-template-columns:1fr}h1{font-size:38px}}
 </style>
@@ -67,41 +74,63 @@
   </div>
 
   <h2>The 7 tests we run on every batch</h2>
-  <ul class="tests">
-    <li><span class="num">1</span><b>Protein</b><span>Confirms the protein content on the label.</span></li>
-    <li><span class="num">2</span><b>Heavy metals</b><span>Lead, cadmium, arsenic, mercury.</span></li>
-    <li><span class="num">3</span><b>Microbial</b><span>E. coli, Salmonella, yeast and mould.</span></li>
-    <li><span class="num">4</span><b>Hygiene check</b><span>Total bacteria count: shows the powder was handled cleanly.</span></li>
-    <li><span class="num">5</span><b>Aflatoxins</b><span>Toxins from mould on crops.</span></li>
-    <li><span class="num">6</span><b>Pesticides</b><span>Multi-residue pesticide screen.</span></li>
-    <li><span class="num">7</span><b>Glyphosate</b><span>The most widely used weed killer.</span></li>
-  </ul>
-  <p class="sub" style="margin-top:14px"><b style="color:var(--teal)">+ Amino acid profile:</b> all 9 essential amino acids, verified by an independent lab.</p>
+  <p class="sub" id="testsHint" style="margin:-4px 0 14px">Enter your LOT number above to see the lab report for each test.</p>
+  <ul class="tests" id="tests"></ul>
 
-  <h2>All batches</h2>
-  <table class="batches"><thead><tr><th>LOT</th><th>Status</th><th>Report</th></tr></thead><tbody id="list"></tbody></table>
+  <h2>Also verified</h2>
+  <ul class="tests one" id="extra"></ul>
 
   <footer>Bilovna Foods Limited · Cambridge, Ontario<br>Questions? Message us on Instagram @bilovnafoods</footer>
 </div>
 
 <script>
-/* ===== Add each batch here =====
+/* ================= EDIT HERE =================
+   Add one entry per batch BEFORE it ships.
    status: "pending" or "passed"
-   report: file name in /reports/ (PDF), or "" if not ready */
+   reports: PDF file name in /reports/ for each test.
+            The same PDF can be used for several tests. */
 const BATCHES = [
-  { lot: "PILOT-01", status: "pending", report: "" },
+  { lot: "PILOT-01", status: "pending", reports: {
+      protein: "", metals: "", micro: "", hygiene: "",
+      aflatoxin: "", pesticides: "", glyphosate: "" } },
 ];
+/* Amino acid profile (tested once, same for all batches) */
+const AMINO_REPORT = "";
+/* ============================================ */
 
+const TESTS = [
+  ["protein", "Protein", "Confirms the protein content on the label."],
+  ["metals", "Heavy metals", "Lead, cadmium, arsenic, mercury."],
+  ["micro", "Microbial", "E. coli, Salmonella, yeast and mould."],
+  ["hygiene", "Hygiene check", "Total bacteria count: shows the powder was handled cleanly."],
+  ["aflatoxin", "Aflatoxins", "Toxins from mould on crops."],
+  ["pesticides", "Pesticides", "Multi-residue pesticide screen."],
+  ["glyphosate", "Glyphosate", "The most widely used weed killer."],
+];
 const REP = "/reports/";
 const norm = s => s.trim().toUpperCase().replace(/\s+/g, "");
-const list = document.getElementById("list");
-BATCHES.forEach(b => {
-  const tr = document.createElement("tr");
-  const pill = b.status === "passed" ? '<span class="pill pass">All 7 passed</span>' : '<span class="pill pend">Testing in progress</span>';
-  const rep = b.report ? `<a href="/reports/${b.report}" target="_blank" rel="noopener">View PDF</a>` : "—";
-  tr.innerHTML = `<td>${b.lot}</td><td>${pill}</td><td>${rep}</td>`;
-  list.appendChild(tr);
-});
+const link = f => `<a class="pdf" href="${REP}${f}" target="_blank" rel="noopener">View report</a>`;
+
+function card(num, name, desc, foot) {
+  return `<li><div class="top"><span class="num">${num}</span><b>${name}</b></div><span class="d">${desc}</span>${foot ? `<div class="foot">${foot}</div>` : ""}</li>`;
+}
+function renderTests(b) {
+  document.getElementById("tests").innerHTML = TESTS.map(([k, n, d], i) => {
+    let foot = "";
+    if (b && b.status === "passed") {
+      const f = b.reports && b.reports[k];
+      foot = `<span class="pill pass">✓ Passed</span>` + (f ? link(f) : `<span class="soon">Report coming soon</span>`);
+    } else if (b) {
+      foot = `<span class="pill pend">Testing in progress</span>`;
+    }
+    return card(i + 1, n, d, foot);
+  }).join("");
+  document.getElementById("testsHint").style.display = b ? "none" : "block";
+}
+document.getElementById("extra").innerHTML = card("+", "Amino acid profile",
+  "All 9 essential amino acids, verified by an independent lab.",
+  AMINO_REPORT ? `<span class="pill pass">✓ Verified</span>` + link(AMINO_REPORT) : "");
+renderTests(null);
 
 function check() {
   const v = norm(document.getElementById("lot").value);
@@ -111,12 +140,15 @@ function check() {
   if (!b) {
     out.className = "bad";
     out.innerHTML = `<b>We couldn't find LOT ${v}.</b><br>Please check the LOT number on the back of your pouch and try again. If it still doesn't show up, message us on Instagram @bilovnafoods.`;
+    renderTests(null);
   } else if (b.status === "passed") {
     out.className = "ok";
-    out.innerHTML = `<b>LOT ${b.lot}: all 7 tests passed.</b><br>` + (b.report ? `<a href="${REP}${b.report}" target="_blank" rel="noopener">Open the lab report (PDF)</a>` : "Report coming soon.");
+    out.innerHTML = `<b>LOT ${b.lot}: all 7 tests passed.</b><br>Open the report for each test below.`;
+    renderTests(b);
   } else {
     out.className = "wait";
     out.innerHTML = `<b>LOT ${b.lot}: testing in progress.</b><br>Results are posted here as soon as the lab reports come back.`;
+    renderTests(b);
   }
 }
 document.getElementById("go").addEventListener("click", check);
